@@ -1,0 +1,16 @@
+{
+    "name": "DigiWellie Technology",
+    "short_name": "DigiWellie",
+    "description": "DigiWellie's HR Software",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "orangered",
+    "theme_color": "orangered",
+    "icons": [
+      {
+        "src": "/static/favicons/apple-touch-icon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ]
+  }

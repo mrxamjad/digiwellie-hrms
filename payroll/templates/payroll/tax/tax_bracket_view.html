@@ -1,0 +1,77 @@
+{% load i18n %} {% if messages %}
+<div class="oh-alert-container">
+  {% for message in messages %}
+  <div class="oh-alert oh-alert--animated {{message.tags}}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+<div class="oh-sticky-table__table">
+  <div class="oh-sticky-table__thead">
+    <div class="oh-sticky-table__tr">
+      <div class="oh-sticky-table__th">{% trans "Tax Rate" %}</div>
+      <div class="oh-sticky-table__th">{% trans "Min. Income" %}</div>
+      <div class="oh-sticky-table__th">{% trans "Max. Income" %}</div>
+
+      {% if perms.payroll.change_taxbracket %}
+      <div class="oh-sticky-table__th"></div>
+      {% endif %} {% if perms.payroll.delete_taxbracket %}
+      <div class="oh-sticky-table__th"></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="oh-sticky-table__tbody">
+    {% for tax_bracket in tax_brackets %}
+    <div class="oh-sticky-table__tr" draggable="true">
+      <div class="oh-sticky-table__td">
+        {{ tax_bracket.tax_rate|stringformat:".2f" }}%
+      </div>
+      <div class="oh-sticky-table__td">
+        {{currency}}{{ tax_bracket.min_income|stringformat:".2f" }}
+      </div>
+      <div class="oh-sticky-table__td">
+        {{currency}}{{ tax_bracket.get_display_max_income|stringformat:".2f" }}
+      </div>
+      {% if perms.payroll.change_taxbracket %}
+      <div class="oh-sticky-table__td">
+        <div class="oh-btn-group">
+          <a
+            class="oh-btn oh-btn--light-bkg w-100"
+            data-toggle="oh-modal-toggle"
+            data-target="#objectUpdateModal"
+            hx-get="{% url 'tax-bracket-update' tax_bracket_id=tax_bracket.id %}"
+            hx-target="#objectUpdateModalTarget"
+            title="{% trans 'Update' %}"
+          >
+            <ion-icon
+              name="create-outline"
+              role="img"
+              class="md hydrated"
+              aria-label="create outline"
+            ></ion-icon>
+          </a>
+        </div>
+      </div>
+      {% endif %} {% if perms.payroll.delete_taxbracket %}
+      <div class="oh-sticky-table__td">
+        <div class="oh-btn-group">
+          <button
+            class="oh-btn oh-btn--danger-outline w-100"
+            title="{% trans 'Delete' %}"
+            hx-confirm="{% trans 'Are you sure to delete this Tax bracket ?' %}"
+            hx-post="{% url 'tax-bracket-delete' tax_bracket_id=tax_bracket.id%}"
+            hx-target="#taxbracketList{{tax_bracket.filing_status_id.id}}"
+          >
+            <ion-icon
+              name="trash-outline"
+              role="img"
+              class="md hydrated"
+              aria-label="trash outline"
+            ></ion-icon>
+          </button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>

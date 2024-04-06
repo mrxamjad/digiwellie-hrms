@@ -1,0 +1,20 @@
+{% load i18n %}
+<form
+	{% if t_type_id %}
+    hx-post="{% url 'ticket-type-update' t_type_id %}"
+	{% else	%}
+	hx-post="{% url 'ticket-type-create' %}"
+	{% endif %}
+	hx-target="#ticketForm"
+	method="post"
+>
+	{% csrf_token %}
+	{{form.non_field_errors}}
+    {{form.as_p}}
+	<div class="d-flex flex-row-reverse">
+		<button type="submit" class="oh-btn oh-btn--secondary mt-2 mr-0 pl-4 pr-5 oh-btn--w-100-resp">
+			{% trans "Save" %}
+		</button>
+	</div>
+	<div class="oh-inner-sidebar-content__footer"></div>
+</form>

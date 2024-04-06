@@ -1,0 +1,526 @@
+{% load static %}
+
+{% load i18n %}
+{% load attendancefilters %}
+<!DOCTYPE html>
+<html>
+  {% get_current_language_bidi as LANGUAGE_BIDI %}
+  {% get_current_language as LANGUAGE_CODE %}
+  {% comment %} <html dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" lang="{{ LANGUAGE_CODE }}"> {% endcomment %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script>
+    var at_work_seconds = {{ request.user.employee_get.get_forecasted_at_work.forecasted_at_work_seconds }}
+    var run = 0
+  </script>
+  <title class="time-runner stop-runner">DigiWellie</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicons/apple-touch-icon.png' %}">
+  <link rel="stylesheet" href="{% static 'build/css/driver.min.css' %}"/>
+  <meta name="theme-color" content="orangered">
+  <link rel="manifest" href="{% static 'build/manifest.json' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicons/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicons/favicon-16x16.png' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.20/dist/sweetalert2.min.css">
+
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="{% static 'build/css/style.min.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'build/css/summernote-lite.min.css' %}" />
+  <script src="{% static '/jquery/ajax.js' %}" ></script>
+  <script src="{% static '/jquery/jquery.min.js' %}"></script>
+  <link rel="stylesheet" href="{% static '/jquery/jqueryui.css' %}">
+  <script src="{% static '/jquery/jqueryui.js' %}"></script>
+  <script src="{% static '/base/toggleColumn.js' %}"></script>
+  <script src="{% static '/build/js/orgChart.js' %}"></script>
+  <script src="{% static 'build/js/driver.js' %}"></script>
+
+
+  <!-- Popper.JS -->
+  <!-- Bootstrap JS -->
+  {% block styles %}
+  {% endblock styles %}
+</head>
+
+{% comment %} <div class="flexbox"> {% endcomment %}
+
+
+  <!-- TRIPLE SPINNER -->
+  {% comment %} <div>
+    <div class="triple-spinner"></div>
+  </div> {% endcomment %}
+{% comment %} </div> {% endcomment %}
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <span class="logged-in" data-user-id="{{request.user.id}}"></span>
+    {% if messages %}
+    <div class="oh-alert-container">
+        {% for message in messages %}
+        <div class="oh-alert oh-alert--animated {{message.tags}}">
+              {{ message }}
+        </div> 
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+    <div class="oh-wrapper-main" :class="!sidebarOpen ? 'oh-wrapper-main--closed' : ''" x-data="{sidebarOpen: true}"
+    @load.window="
+    width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+    if (width < 575.98) {
+      sidebarOpen = false
+    }" @resize.window="
+    width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+    if (width < 575.98) {
+      sidebarOpen = false
+    }">
+    <div id="sidebar" >
+     {% include 'sidebar.html' %}
+    </div>
+    
+
+    <div id="main">
+      <!-- Navigation -->
+      <!-- Confirm Modal -->
+      
+      <div
+      class="oh-modal"
+      id="confirmModal"
+      role="dialog"
+      aria-labelledby="confirmModalLabel"
+      aria-hidden="true"
+    >
+      <div class="oh-modal__dialog oh-modal__dialog--confirm">
+        <div class="oh-modal__dialog-header">
+          <span class="oh-modal__dialog-title" id="confirmModalLabel"
+            ></span
+          >
+        </div>
+        <div class="oh-modal__dialog-body" id="confirmModalBody">
+        
+        </div>
+        {% comment %} <div class="oh-modal__dialog-footer">
+          <button class="oh-btn oh-btn--success" id="ok">{% trans "Confirm" %}</button>
+          <button class="oh-btn oh-btn--danger oh-modal__cancel" id="cancel">
+          {% trans "Cancel" %}
+          </button>
+        </div> {% endcomment %}
+      </div>
+    </div>
+    <!-- End of Confirm Modal -->
+    <div class="oh-activity-sidebar " id="allNotifications" style="z-index:1000">
+      <div class="oh-activity-sidebar__header">
+        <span id="notificationClose" style="cursor: pointer;" title="{% trans 'Close' %}">
+            <ion-icon
+                name="chevron-forward-outline"
+                class="oh-activity-sidebar__header-icon me-2 oh-activity-sidebar__close"
+                id="close"
+                data-target="#activitySidebar"
+                style="font-size: 24px;"
+            ></ion-icon>
+        </span>
+        <span class="oh-activity-sidebar__title"> {% trans "All Notifications" %}</span>
+        <a class="delete-all-link" hx-target="#allNotificationBody" hx-post="{% url 'delete-all-notifications'%}">{% trans "Clear all" %}</a>    
+      </div>
+      <div class="oh-activity-sidebar__body" id="allNotificationBody">
+        {% include "notification/all_notifications.html" %}
+      </div>
+    </div>
+      <nav class="oh-navbar" style="width: -webkit-fill-available;;">
+        <div class="oh-wrapper oh-navbar__wrapper">
+          {% comment %} <div class="oh-navbar__toggle-container">
+            <a href="#" class="oh-navbar__toggle-link oh-link__unstyled" @click="sidebarOpen = !sidebarOpen">
+              <img src="{% static 'images/ui/menu.svg' %}" width="24" height="24" class="oh-navbar__toggle-menu"
+                loading="lazy" />
+              <span class="oh-tabs__movable-title" style="color: rgb(0, 0, 14);">{% trans request.session.title %}</span>
+            </a>
+          </div> {% endcomment %}
+          <div class="oh-navbar__toggle-container">
+            <a href="#" class="oh-navbar__toggle-link oh-link__unstyled" @click="sidebarOpen = !sidebarOpen">
+              <img src="{% static 'images/ui/menu.svg' %}" width="24" height="24" class="oh-navbar__toggle-menu"
+                loading="lazy" />
+            </a>
+              <!-- <span class="oh-navbar__page-title">Attendances</span> -->
+              {% if breadcrumbs %}
+              {% comment %} {{breadcrumbs}} {% endcomment %}
+                <ul class="oh-navbar__breadcrumb">
+                  {% for breadcrumb in breadcrumbs %}
+                    {% if forloop.last %}
+                      <li class="oh-navbar__breadcrumb-item">
+                        {% if breadcrumb.found %}
+                          <a href="{{breadcrumb.url}}" class="oh-navbar__breadcrumb-link active">{% trans breadcrumb.name %}</a>
+                        {% else %}
+                          <a href="#" class="oh-navbar__breadcrumb-link active">{% trans breadcrumb.name %}</a>
+                        {% endif %}
+                      </li>
+                    {% else %}
+                      <li class="oh-navbar__breadcrumb-item">
+                        {% if breadcrumb.found %}
+                          <a href="{{breadcrumb.url}}" class="oh-navbar__breadcrumb-link">{% trans breadcrumb.name %}</a>
+                        {% else %}
+                          <a href="#" class="oh-navbar__breadcrumb-link">{% trans breadcrumb.name %}</a>
+                        {% endif %}
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </a>
+          </div>
+          <div class="oh-navbar__systray">
+            <div id="attendance-activity-container">
+            {% if request.user.employee_get %}
+              {% if request.session.selected_company == "all" or request.user.employee_get.employee_work_info.company_id.id == request.session.selected_company|default:"-1"|add:"0" %}
+              
+              <!-- "CHEKING WETHER ITS IS THE CURRENT EMPLOYEES COMPANY OR ALL COMPANY, THEN ONLY SHOWS THE CHECK-IN, CHECK-OUT BUTTON" -->
+                {% if request.user|is_clocked_in  %}
+                <button class="oh-btn oh-btn--warning-outline mr-2" {% if enabled_timerunner %} onmouseenter="$(this).find('span').show();$(this).find('.time-runner').hide();" onmouseleave="$(this).find('span').hide();$(this).find('.time-runner').show();" {% endif %} hx-get="{% url 'clock-out' %}"  hx-target='#attendance-activity-container' hx-swap='innerHTML'><ion-icon class="oh-navbar__clock-icon mr-2 text-warning" name="exit-outline"></ion-icon>
+                  <span class="hr-Check-In-out-text" {% if enabled_timerunner %} style="display: none;" {% endif %}>{% trans "Check-Out" %}</span>                
+                  <div class="time-runner"></div>                
+                </button>
+                <script>
+                  run = 1
+                  </script>
+                {% else %}
+                <button{% if enabled_timerunner %} onmouseenter="$(this).find('span').show();$(this).find('.at-work-seconds').hide();" onmouseleave="$(this).find('span').hide();$(this).find('.at-work-seconds').show();" {% endif %} 
+                        class="oh-btn oh-btn--success-outline mr-2" hx-get="{% url 'clock-in' %}"  hx-target='#attendance-activity-container' hx-swap='innerHTML'
+                        >
+                        <ion-icon class="oh-navbar__clock-icon mr-2 text-success" name="enter-outline"></ion-icon>
+                  <span class="hr-Check-In-out-text" {% if enabled_timerunner %} style="display: none;" {% endif %}>{% trans "Check-In" %}</span>                
+                  <div class="at-work-seconds"></div>
+                </button>
+                {% if enabled_timerunner %}
+                <script>
+                  $(document).ready(function () {
+                    $('.at-work-seconds').html(secondsToDuration({{request.user.employee_get.get_forecasted_at_work.forecasted_at_work_seconds}}))
+                  });
+                  run = 0
+                </script>
+                {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+            </div>
+            {% if request.user|any_permission:'base' or perms.attendance.view_attendancevalidationcondition %}
+              <div class="oh-navbar__action-icons" title="Settings">
+                <a href="/settings/general-settings" id="settingsMenu" class="oh-navbar__action-icons-link">
+                  <ion-icon name="settings-outline"  class="oh-navbar__icon"></ion-icon>
+                </a>
+              </div>
+            {% endif %}
+            {% include 'notification/notification.html' %}
+            <div class="oh-dropdown" id="multiLanguage" x-data="{open: false}" @click="open = !open">
+              <div class="oh-navbar__action-icons">
+                  <a href="#" class="oh-navbar__action-icons-link"  title="Languages">
+                      <ion-icon name="globe-outline" class="oh-navbar__icon"></ion-icon>
+                  </a>
+                  <div class="oh-dropdown__menu oh-dropdown__menu--right" x-show="open" @click.outside="open = false" style="display:none; margin-top:95%;">
+                      <ul class="oh-dropdown__items">
+                          {% get_available_languages as LANGUAGES %}
+                          {% for language in LANGUAGES %}
+                          <li class="oh-dropdown__item">
+                              <a href="{% url 'set_language' %}" class="oh-dropdown__link"
+                                 onclick="event.preventDefault(); document.getElementById('language-form-{{ language.0 }}').submit();">
+                                  <img src="/static/images/ui/{{ language.0 }}.png" class="oh-dropdown__lang-icon"/>{{ language.1 }}{% if language.0 == LANGUAGE_CODE %}      
+                                  <ion-icon name="checkmark-circle-outline" style="
+                                  position: relative;
+                                  top: 3.3px;
+                                  color: green;
+                                  font-size: 1.2em;
+                              "></ion-icon>
+                                  {% endif %}
+                              </a>
+                              <form id="language-form-{{ language.0 }}" action="{% url 'set_language' %}" method="post" style="display: none;">
+                                  {% csrf_token %}
+                                  <input type="hidden" name="language" value="{{ language.0 }}">
+                              </form>
+                          </li>
+                          {% endfor %}
+                      </ul>
+                  </div>
+              </div>
+            </div>
+            {% if perms.base.view_company %}       
+              <div id="multCompany" class="oh-dropdown" x-data="{open: false}" @click="open = !open" title="Companies">
+                <div class="oh-navbar__action-icons">
+                    <a href="#" class="oh-navbar__action-icons-link">
+                      <ion-icon name="business"></ion-icon>
+                    </a>
+                    <div class="oh-dropdown__menu oh-dropdown__menu--right" x-show="open" @click.outside="open = false" style="display:none; margin-top:115%;">
+                        <ul class="oh-dropdown__items">
+                            {% for company in all_companies %}
+                            <li class="oh-dropdown__item">
+                                <a hx-get="{% url "update-selected-company" %}?company_id={{company.0}}"class="oh-dropdown__link">
+                                    <img src="{{company.2}}" class="oh-dropdown__lang-icon" style="border-radius: 50%;"/>{{company.1}}   
+                                    {% if company.3 %}
+                                    <ion-icon name="checkmark-circle-outline" style="
+                                        position: relative;
+                                        top: 3.3px;
+                                        color: green;
+                                        font-size: 1.2em;
+                                    "></ion-icon>
+                                    {% endif %}
+                                    {% if not company_selected and request.user.employee_get.employee_work_info.company_id.id == company.0 %}
+                                    <ion-icon name="checkmark-circle-outline" style="
+                                        position: relative;
+                                        top: 3.3px;
+                                        color: green;
+                                        font-size: 1.2em;
+                                    "></ion-icon>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+              </div> 
+            {% endif %}    
+            <div class="oh-dropdown" x-data="{open: false}" id="mainNavProfile">
+              <div class="oh-navbar__user-info" @click="open = !open" @click.outside="open = false">
+                <div class="oh-navbar__user-photo">
+                  <img src="{{request.user.employee_get.get_avatar}}" class="oh-navbar__user-image" loading="lazy" />
+                </div>
+                <span class="oh-navbar__user-name">{{user.employee_get.employee_first_name | title}}</span>
+              </div>
+              <div class="oh-dropdown__menu oh-dropdown__menu--right" x-show="open" style="display: none;">
+                <ul class="oh-dropdown__items">
+                  {% if request.session.selected_company == "all" or request.user.employee_get.employee_work_info.company_id.id == request.session.selected_company|default:"-1"|add:"0" %}
+                  <li class="oh-dropdown__item">
+                    <a href="/employee/employee-profile" class="oh-dropdown__link">{% trans "My Profile" %}</a>
+                  </li>
+                  <li class="oh-dropdown__item">
+                    <a href="/change-password" class="oh-dropdown__link">{% trans "Change Password" %}</a>
+                  </li>
+                  {% endif %}
+                </ul>
+                <hr />
+                <ul class="oh-dropdown__items">
+                  <li class="oh-dropdown__item">
+                    <a href="/logout" class="oh-dropdown__link">{% trans "Logout" %}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      {% include "floating_button.html" %}
+      </nav>
+      <!-- End of Navigation -->
+
+      <div id='main-section' >
+        <div id="tripple-loader-contaner" class="d-flex justify-content-center align-items-center  tripple-loader-contaner--visible" style="height:90vh;"><div class="triple-spinner"></div></div>
+        <div id="main-section-data" style="display: none;" data-lang="{{LANGUAGE_CODE}}">
+          {% block content %}
+            {% include 'dashboard.html' %}
+          {% endblock content %}
+          <div
+            class="oh-modal" style="z-index: 60;"
+            id="objectDetailsModal"
+            role="dialog"
+            aria-labelledby="objectDetailsModalLabel"
+            aria-hidden="true"
+            >
+            <div class="oh-modal__dialog oh-modal__dialog-relative" style="max-width: 550px" id="objectDetailsModalTarget"> </div>
+          </div>
+          <div
+            class="oh-modal" style="z-index: 60;"
+            id="objectDetailsModalW25"
+            role="dialog"
+            aria-labelledby="objectDetailsModalW25Label"
+            aria-hidden="true"
+            >
+            <div class="oh-modal__dialog oh-modal__dialog-relative" style="max-width: 410px" id="objectDetailsModalW25Target"> </div>
+          </div>
+          <div
+            class="oh-modal"
+            id="objectCreateModal"
+            role="dialog"
+            aria-labelledby="objectCreateModalLabel"
+            aria-hidden="true"
+            >
+            <div class="oh-modal__dialog" id="objectCreateModalTarget"></div>
+          </div>
+          <div
+            class="oh-modal"
+            id="objectUpdateModal"
+            role="dialog"
+            aria-labelledby="objectUpdateModalLabel"
+            aria-hidden="true"
+            >
+            <div class="oh-modal__dialog" id="objectUpdateModalTarget"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+   
+  </div>
+  
+  <!--htmx script -->
+
+  <script src="{% static 'build/js/web.frontend.min.js' %}"></script>
+  <script src="{% static 'htmx/htmx.min.js' %}"></script>
+  <script>
+    function toggleReimbursmentType(element) {
+      if (element.val() == 'reimbursement') {
+        $('#objectCreateModalTarget [name=attachment]').parent().show()
+        $('#objectCreateModalTarget [name=attachment]').attr("required",true)
+        $('#objectCreateModalTarget [name=leave_type_id]').parent().hide().attr("required",false)
+        $('#objectCreateModalTarget [name=cfd_to_encash]').parent().hide().attr("required",false)
+        $('#objectCreateModalTarget [name=ad_to_encash]').parent().hide().attr("required",false)
+        $('#objectCreateModalTarget [name=amount]').parent().show().attr("required",true)
+        $('#objectCreateModalTarget #availableTable').hide().attr("required",false)
+        $('#objectCreateModalTarget [name=bonus_to_encash]').parent().hide().attr("required",false)
+
+      } else if(element.val() == 'leave_encashment') {
+        $('#objectCreateModalTarget [name=attachment]').parent().hide()
+        $('#objectCreateModalTarget [name=attachment]').attr("required",false)
+        $('#objectCreateModalTarget [name=leave_type_id]').parent().show().attr("required",true)
+        $('#objectCreateModalTarget [name=cfd_to_encash]').parent().show().attr("required",true)
+        $('#objectCreateModalTarget [name=ad_to_encash]').parent().show().attr("required",true)
+        $('#objectCreateModalTarget [name=amount]').parent().hide().attr("required",false)
+        $('#objectCreateModalTarget #availableTable').show().attr("required",true)
+        $('#objectCreateModalTarget [name=bonus_to_encash]').parent().hide().attr("required",false)
+
+      } else if(element.val() == 'bonus_encashment') {
+        $('#objectCreateModalTarget [name=attachment]').parent().hide()
+        $('#objectCreateModalTarget [name=attachment]').attr("required",false)
+        $('#objectCreateModalTarget [name=leave_type_id]').parent().hide().attr("required",false)
+        $('#objectCreateModalTarget [name=cfd_to_encash]').parent().hide().attr("required",false)
+        $('#objectCreateModalTarget [name=ad_to_encash]').parent().hide().attr("required",false)
+        $('#objectCreateModalTarget [name=amount]').parent().hide().attr("required",false)
+        $('#objectCreateModalTarget #availableTable').hide().attr("required",false)
+        $('#objectCreateModalTarget [name=bonus_to_encash]').parent().show().attr("required",true)
+
+
+      }
+    }
+    function getAssignedLeave(employeeElement) {
+      var employeeId=employeeElement.val()
+      $.ajax({
+          type: "get",
+          url: "{% url "get-assigned-leaves" %}",
+          data: { "employeeId": employeeId },
+          dataType: "json",
+          success: function (response) {
+              let rows = ""
+              for (let index = 0; index < response.length; index++) {
+                  const element = response[index];
+                  rows = rows + `<tr class="toggle-highlight"><td>${element.leave_type_id__name
+                      }</td><td>${element.available_days}</td><td>${element.carryforward_days}</td></tr>`
+              }
+              $("#availableTableBody").html($(rows))
+              let newLeaves = ""
+              for (let index = 0; index < response.length; index++) {
+                  const leave = response[index];
+                  newLeaves = newLeaves + `<option value="${leave.leave_type_id__id
+                      }">${leave.leave_type_id__name}</option>`
+              }
+              $('#id_leave_type_id').html(newLeaves) 
+              removeHighlight()
+          }
+      });
+    }
+    function removeHighlight() {
+      setTimeout(function() {
+          $(".toggle-highlight").removeClass("toggle-highlight")
+      }, 200);
+    }
+  </script>
+  <script>
+    document.body.addEventListener('htmx:configRequest', (event) => {
+      event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    })
+
+      $(document).ready(function () {
+        $(document).keydown(function(event) {
+          if (event.keyCode === 27) {
+            $('.oh-modal--show').removeClass('oh-modal--show');
+            $('.oh-activity-sidebar--show').removeClass('oh-activity-sidebar--show')
+          }
+        });
+
+        $("#close").attr(
+          "class",
+          "oh-activity-sidebar__header-icon me-2 oh-activity-sidebar__close md hydrated"
+        );
+      });
+      $("#notificationClose").click(function (e) {
+        $("#allNotifications").removeClass("oh-activity-sidebar--show");
+      });
+
+  </script>
+  <!-- this is the master js  -->
+  <script src="{% static '/index/index.js' %}"></script>
+  <script src="{% static '/index/saveFilters.js' %}"></script>
+  <script src="{% static 'build/js/htmxSelect2.js' %}" ></script>
+  <script src="{% static 'build/js/summernote-lite.min.js' %}" ></script>
+  
+  <!-- This CDN is for date format change -->
+  <script src="{% static '/build/js/moment.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js"></script>
+
+  
+  <script src="{% static '/base/date_settings.js' %}"></script>
+  <script src="{% static '/base/time_formatting.js' %}"></script>
+  <script src="{% static '/base/time_settings.js' %}"></script>
+  <script src="{% static '/base/date_formatting.js' %}"></script>
+  <script src="{% static 'attendance/actions.js' %}"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <script src="{% static '/build/js/sweetAlert.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // Clear all query parameters from the URL
+    function clearQueryParameters() {
+      var urlWithoutQuery = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, urlWithoutQuery);
+    }
+    $(document).ready(function () {
+      $('body').on('click', '.select2-search__field', function(e) {
+      e.stopPropagation();
+    });
+    if (!$(".oh-tabs__tab--active").length) {
+      $(".oh-tabs__tab").click()
+    }
+    });
+  </script>
+  {% if enabled_timerunner %}
+  <script>
+    // time-runner
+    function secondsToDuration(seconds) {
+      var hours = Math.floor(seconds / 3600);
+      var minutes = Math.floor((seconds % 3600) / 60);
+      var remainingSeconds = Math.floor(seconds % 60);
+
+      // add leading zeros if necessary
+      var formattedHours = (hours < 10) ? "0" + hours : hours;
+      var formattedMinutes = (minutes < 10) ? "0" + minutes : minutes;
+      var formattedSeconds = (remainingSeconds < 10) ? "0" + remainingSeconds : remainingSeconds;
+
+      return formattedHours + ":" + formattedMinutes + ":" + formattedSeconds;
+  }
+    // accessing initial worked hours from the user
+    $(".time-runner").not("title").html(secondsToDuration(at_work_seconds));
+    $("title.time-runner").html("DigiWellie | "+secondsToDuration(at_work_seconds));
+    setInterval(() => {
+      if (run) {
+        at_work_seconds = at_work_seconds + 1
+        $("div.time-runner").html(secondsToDuration(at_work_seconds));
+        $("title").html("DigiWellie | "+secondsToDuration(at_work_seconds));
+      }
+    }, 1000);
+  </script>
+  {% endif %}
+  <script>
+    setTimeout(()=>{$("[name='search']").focus()},100)
+  </script>
+
+</body>
+
+</html>

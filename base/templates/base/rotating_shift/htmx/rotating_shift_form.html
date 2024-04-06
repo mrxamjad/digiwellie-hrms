@@ -1,0 +1,20 @@
+{% load i18n %}
+
+<form 
+    {% if rshift.id %}
+    hx-post="{% url 'rotating-shift-update' rshift.id %}"
+    {% else %}
+    hx-post="{% url 'rotating-shift-create' %}"
+    {% endif %}
+    hx-target="#shiftForm"
+    method="post" class='settings-label mb-1'>
+    {% csrf_token %}
+    {{form}}
+    <div class="d-flex flex-row-reverse w-100 align-items-right mt-4">
+      <button type="submit" class="oh-btn oh-btn--secondary pl-5 pr-5">
+        {% trans "Save" %}
+      </button>
+    </div>
+    <div class="oh-inner-sidebar-content__footer">
+    </div>
+</form>

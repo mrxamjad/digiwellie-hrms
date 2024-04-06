@@ -1,0 +1,88 @@
+{% extends 'index.html' %} {% block content %} {% load i18n %}
+<style>
+  .row-status--purple {
+    border-left: 4px solid rgba(128, 128, 128, 0.482);
+    border-radius: 5px;
+  }
+  .row-status--cyan {
+    border-left: 4px solid cyan;
+    border-radius: 5px;
+  }
+  .row-status--yellow {
+    border-left: 4px solid yellowgreen;
+    border-radius: 5px;
+  }
+  .diff-cell{
+    background: rgba(255, 166, 0, 0.158);
+  }
+</style>
+
+{% include 'requests/attendance/nav.html' %}
+{% load basefilters %}
+{% include 'filter_tags.html' %}
+<div class="d-flex flex-row-reverse mb-1">
+  <span class="me-5" hx-get='{% url "search-attendance-requests" %}?attendance_validated=false' hx-target="#view-container" style="cursor: pointer">
+    <span class="oh-dot oh-dot--small" style="background-color:rgba(128, 128, 128, 0.482)"></span>
+    {% trans "Not-Validated" %}
+  </span>
+  <span class="me-3" hx-get='{% url "search-attendance-requests" %}?attendance_validated=true' hx-target="#view-container" style="cursor: pointer">
+    <span class="oh-dot oh-dot--small" style="background-color:yellowgreen"></span>
+    {% trans "Validated" %}
+  </span>
+</div>
+<div class="oh-wrapper ">
+  <div class="oh-tabs">
+    <ul class="oh-tabs__tablist">
+      <li class="oh-tabs__tab oh-tabs__tab--active" data-target="#tab_1">
+        {% trans "Requested Attendances" %}
+      </li>
+      <li class="oh-tabs__tab" data-target="#tab_2">
+        {% trans "Attendances" %}
+      </li>
+    </ul>  {% include "requests/attendance/request_lines.html" %}
+</div>
+
+
+<div class="oh-activity-sidebar" id="activitySidebar" style="z-index:1000;">
+  <div class="oh-activity-sidebar__body" id="commentContainer">
+  </div>
+</div>
+
+<script>
+
+  function enlargeImage(src,$element) {
+      $(".enlargeImageContainer").empty()
+      var enlargeImageContainer = $element.parents().closest("li").find(".enlargeImageContainer")
+      enlargeImageContainer.empty()
+      style = 'width:100%; height:90%; box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2); background:white'
+      var enlargedImage = $('<iframe>').attr({ src: src, style: style })
+      var name = $('<span>').text(src.split('/').pop().replace(/_/g, ' '))
+      enlargeImageContainer.append(enlargedImage)
+      enlargeImageContainer.append(name)
+      setTimeout(function () {
+          enlargeImageContainer.show()
+
+          const iframe = document.querySelector('iframe').contentWindow
+          var iframe_document = iframe.document
+          iframe_image = iframe_document.getElementsByTagName('img')[0]
+          $(iframe_image).attr('style', 'width:100%; height:100%;')
+      }, 100)
+  }
+
+  function hideEnlargeImage() {
+      var enlargeImageContainer = $('.enlargeImageContainer')
+      enlargeImageContainer.empty()
+  }
+
+  $(document).on('click', function (event) {
+      if (!$(event.target).closest('#enlargeImageContainer').length) {
+          hideEnlargeImage()
+      }
+  })  
+  function submitForm(elem) {
+    $(elem).siblings(".add_more_submit").click();
+  }
+  
+</script>
+
+{% endblock content %}
