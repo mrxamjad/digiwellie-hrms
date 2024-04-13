@@ -1,15 +1,13 @@
-# Contributing Guidelines for DigiWellie Technology
+# Contributing Guidelines for Horilla 
 
-Thank you for considering contributing to DigiWellie Technology! We welcome your input and appreciate the community effort to make this project even better.
+Thank you for considering contributing to Horilla! We welcome your input and appreciate the community effort to make this project even better.
 
 ## How to Contribute
 
 1. **Fork the Repository:**
-
-   - Fork the DigiWellie Technology repository on GitHub to your own space.
+   - Fork the Horilla repository on GitHub to your own space.
 
 2. **Clone the Repository:**
-
    - Clone the forked repository to your local machine.
 
      ```bash
@@ -17,7 +15,6 @@ Thank you for considering contributing to DigiWellie Technology! We welcome your
      ```
 
 3. **Create a Branch:**
-
    - Create a new branch for your feature or bug fix.
 
      ```bash
@@ -25,19 +22,16 @@ Thank you for considering contributing to DigiWellie Technology! We welcome your
      ```
 
 4. **Make Changes:**
-
    - Make your changes and ensure that your code adheres to the project's coding standards.
 
 5. **Commit Changes:**
-
    - Commit your changes with a clear and descriptive commit message.
 
      ```bash
-     git commit -m "Add feature X"
+     git commit -m "Add feature X" 
      ```
 
 6. **Push Changes:**
-
    - Push your changes to your forked repository on GitHub.
 
      ```bash
@@ -45,7 +39,7 @@ Thank you for considering contributing to DigiWellie Technology! We welcome your
      ```
 
 7. **Create a Pull Request:**
-   - Open a pull request on the official DigiWellie Technology repository.
+   - Open a pull request on the official Horilla repository.
    - Provide a clear title and description for your pull request.
    - Reference any relevant issues in your pull request description.
 
@@ -67,4 +61,4 @@ Thank you for considering contributing to DigiWellie Technology! We welcome your
 - Provide constructive feedback.
 - Encourage a positive and inclusive community.
 
-Thank you for your contributions to DigiWellie Technology! Together, we can build a better and more efficient HR management solution using Django.
+Thank you for your contributions to Horilla! Together, we can build a better and more efficient HR management solution using Django.
